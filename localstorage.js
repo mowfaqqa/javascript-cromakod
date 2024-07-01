@@ -1,150 +1,164 @@
-// localStorage & sessionStorage
+// Define UI Vars
+const form = document.querySelector('#task-form');
+const taskList = document.querySelector('.collection');
+const clearBtn = document.querySelector('.clear-tasks');
+const filter = document.querySelector('#filter');
+const taskInput = document.querySelector('#task');
 
-// localStorage
-// saving items in the localstorage
-// localStorage.setItem("name", "Muwaffaq");
-// localStorage.setItem("age", "30");
+// Load all event listeners
+loadEventListeners();
 
-// const students = [
-//   {
-//     name: "Aliyu Madaki",
-//     level: 200,
-//     dept: "computer science",
-//   },
-//   {
-//     name: "Fatima Ahmed",
-//     level: 200,
-//     dept: "computer science",
-//   },
-//   {
-//     name: "Kabiru Musa",
-//     level: 200,
-//     dept: "computer science",
-//   },
-// ];
+// Load all event listeners
+function loadEventListeners() {
+  // DOM Load event
+  document.addEventListener('DOMContentLoaded', getTasks);
+  // Add task event
+  form.addEventListener('submit', addTask);
+  // Remove task event
+  taskList.addEventListener('click', removeTask);
+  // Clear task event
+  clearBtn.addEventListener('click', clearTasks);
+  // Filter tasks event
+  filter.addEventListener('keyup', filterTasks);
+}
 
-// used to convert other data types to string
-// JSON.stringify();
-// localStorage.setItem("students", JSON.stringify(students));
-
-// get items from localStorage
-// const firstname = localStorage.getItem("name");
-// const age = localStorage.getItem("age");
-// const getstudents = localStorage.getItem("students");
-// const convertedDataType = JSON.parse(getstudents)
-// console.log(convertedDataType)
-
-// remove items
-// localStorage.removeItem("age");
-
-// clear localStorage completely
-// localStorage.clear();
-
-// sessionStorage
-// add item
-// sessionStorage.setItem("password", "P@55wording");
-
-// get items
-
-// const password = sessionStorage.getItem("password");
-// console.log(password);
-
-// remove items
-// sessionStorage.removeItem("password");
-
-// clear items entirely
-// sessionStorage.clear();
-
-const form = document.getElementById("task-form");
-const taskInput = document.querySelector("#task");
-const collection = document.querySelector(".collection");
-const clearBtn = document.querySelector(".clear-tasks");
-
-// listen for a submit event
-form.addEventListener("submit", runevent);
-document.addEventListener("DOMContentLoaded", getTasks);
-
+// Get Tasks from LS
 function getTasks() {
   let tasks;
-  if (localStorage.getItem("tasks") === null) {
+  if(localStorage.getItem('tasks') === null){
     tasks = [];
   } else {
-    tasks = JSON.parse(localStorage.getItem("tasks"));
+    tasks = JSON.parse(localStorage.getItem('tasks'));
   }
 
-  tasks.map((task, index) => {
-    // created the li element
-    const li = document.createElement("li");
-    li.className = "collection-item";
-    li.innerText = task;
-    // creating link
-    const a = document.createElement("a");
-    a.classList = "delete-item secondary-content";
-    a.innerHTML = "<i class='fa fa-remove'></i>";
+  tasks.forEach(function(task){
+    // Create li element
+    const li = document.createElement('li');
+    // Add class
+    li.className = 'collection-item';
+    // Create text node and append to li
+    li.appendChild(document.createTextNode(task));
+    // Create new link element
+    const link = document.createElement('a');
+    // Add class
+    link.className = 'delete-item secondary-content';
+    // Add icon html
+    link.innerHTML = '<i class="fa fa-remove"></i>';
+    // Append the link to li
+    li.appendChild(link);
 
-    li.appendChild(a);
-    collection.appendChild(li);
+    // Append li to ul
+    taskList.appendChild(li);
   });
 }
-function runevent(e) {
-  e.preventDefault();
 
-  const formValue = taskInput.value;
-
-  // created the li element
-  const li = document.createElement("li");
-  li.className = "collection-item";
-  li.innerText = task;
-  // creating link
-  const a = document.createElement("a");
-  a.classList = "delete-item secondary-content";
-  a.innerHTML = "<i class='fa fa-remove'></i>";
-
-  li.appendChild(a);
-  collection.appendChild(li);
-
-  //save to localstorage
-  let tasks;
-  if (localStorage.getItem("tasks") === null) {
-    tasks = [];
-  } else {
-    tasks = JSON.parse(localStorage.getItem("tasks"));
+// Add Task
+function addTask(e) {
+  if(taskInput.value === '') {
+    alert('Add a task');
   }
-  tasks.push(formValue);
-  localStorage.setItem("tasks", JSON.stringify("tasks"));
+
+  // Create li element
+  const li = document.createElement('li');
+  // Add class
+  li.className = 'collection-item';
+  // Create text node and append to li
+  li.appendChild(document.createTextNode(taskInput.value));
+  // Create new link element
+  const link = document.createElement('a');
+  // Add class
+  link.className = 'delete-item secondary-content';
+  // Add icon html
+  link.innerHTML = '<i class="fa fa-remove"></i>';
+  // Append the link to li
+  li.appendChild(link);
+
+  // Append li to ul
+  taskList.appendChild(li);
+
+  // Store in LS
+  storeTaskInLocalStorage(taskInput.value);
+
+  // Clear input
+  taskInput.value = '';
+
+  e.preventDefault();
 }
 
-// logic for clear all tasks
-//event listener for clear-task button
-clearBtn.addEventListener("click", runClearTask);
+// Store Task
+function storeTaskInLocalStorage(task) {
+  let tasks;
+  if(localStorage.getItem('tasks') === null){
+    tasks = [];
+  } else {
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+  }
 
-function runClearTask(e) {
-  e.preventDefault();
+  tasks.push(task);
 
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// Remove Task
+function removeTask(e) {
+  if(e.target.parentElement.classList.contains('delete-item')) {
+    if(confirm('Are You Sure?')) {
+      e.target.parentElement.parentElement.remove();
+
+      // Remove from LS
+      removeTaskFromLocalStorage(e.target.parentElement.parentElement);
+    }
+  }
+}
+
+// Remove from LS
+function removeTaskFromLocalStorage(taskItem) {
+  let tasks;
+  if(localStorage.getItem('tasks') === null){
+    tasks = [];
+  } else {
+    tasks = JSON.parse(localStorage.getItem('tasks'));
+  }
+
+  tasks.forEach(function(task, index){
+    if(taskItem.textContent === task){
+      tasks.splice(index, 1);
+    }
+  });
+
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// Clear Tasks
+function clearTasks() {
+  // taskList.innerHTML = '';
+
+  // Faster
+  while(taskList.firstChild) {
+    taskList.removeChild(taskList.firstChild);
+  }
+
+  // https://jsperf.com/innerhtml-vs-removechild
+
+  // Clear from LS
+  clearTasksFromLocalStorage();
+}
+
+// Clear Tasks from LS
+function clearTasksFromLocalStorage() {
   localStorage.clear();
 }
 
-//delete items
-// add event listener to collection element
-collection.addEventListener("click", deleteTask);
+// Filter Tasks
+function filterTasks(e) {
+  const text = e.target.value.toLowerCase();
 
-function deleteTask(e) {
-  if (e.target.parentElement.classList.contains("delete-item")) {
-    e.target.parentElement.parentElement.remove();
-  }
-
-  const taskItem = e.target.parentElement.parentElement;
-  // remove from local storage
-  let tasks;
-  if (localStorage.getItem("tasks") === null) {
-    tasks = [];
-  } else {
-    tasks = JSON.parse(localStorage.getItem("tasks"));
-  }
-
-  tasks.forEach((task, index) => {
-    if (taskItem.textContent === task) {
-      tasks.splice(index, 1);
+  document.querySelectorAll('.collection-item').forEach(function(task){
+    const item = task.firstChild.textContent;
+    if(item.toLowerCase().indexOf(text) != -1){
+      task.style.display = 'block';
+    } else {
+      task.style.display = 'none';
     }
   });
 }
